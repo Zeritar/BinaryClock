@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-User=mike
+User=root
 ExecStart=/usr/local/bin/clock
 
 [Install]
