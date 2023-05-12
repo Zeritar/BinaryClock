@@ -1,0 +1,11 @@
+[Unit]
+Description=Binary Clock
+After=multi-user.target
+
+[Service]
+Type=idle
+User=mike
+ExecStart=/usr/local/bin/clock
+
+[Install]
+WantedBy=multi-user.target

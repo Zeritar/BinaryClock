@@ -1,0 +1,100 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "BINARYCLOCK" "" "May 2023" ""
+.nf
+BinaryClock \- Display a binary clock on the Sense HAT LED Matrix
+.fi
+.SH "SYNOPSIS"
+.nf
+dotnet BinaryClock\.dll [OPTIONS]
+.fi
+.SH "DESCRIPTION"
+.nf
+The `BinaryClock` program displays a binary clock on the Sense HAT LED Matrix, allowing you to visualize the time using binary representation\.
+.P
+The SenseHat joystick can be used to switch the clock into different modes:
+.P
+    Vertical axis switches between horizontal and vertical format.
+.P
+    Horizontal axis switched between 12 hour and 24 hour format.
+.P
+    Pressing the center button exits the program.
+.fi
+.SH "OPTIONS"
+.nf
+\-V, \-\-vertical
+    Display the clock in vertical format\.
+
+\-A, \-\-ampm
+    Display the clock in 12\-hour mode with AM/PM indication\.
+
+\-h, \-\-help
+    Display this help message\.
+.fi
+.SH "MODES"
+.SS "Vertical Format"
+By using the \fB\-V\fR or \fB\-\-vertical\fR option, the clock will be displayed in a vertical format on the Sense HAT LED Matrix\. This format arranges the binary representation of time vertically, with each row representing a specific unit of time (hours, minutes, and seconds)\.
+.SS "12\-Hour Mode with AM/PM Indication"
+When the \fB\-A\fR or \fB\-\-ampm\fR option is used, the clock will be displayed in 12\-hour mode with AM/PM indication on the Sense HAT LED Matrix\. In this mode, the clock will indicate whether it is morning (AM) or afternoon/evening (PM) by coloring the corresponding LED lights\. Green lights represent AM, while orange lights represent PM\.
+.SS "Example Output"
+Example output on the Sense HAT LED Matrix (8x8 grid) in various modes at 8:39 PM:
+.P
+$ dotnet BinaryClock\.dll
+.P
+○ ○ ○ ● ○ ● ○ ○
+.P
+○ ○ ● ○ ○ ● ● ●
+.P
+○ ○ ● ○ ● ○ ● ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+The LEDs are white\.
+.P
+$ dotnet BinaryClock\.dll \-A
+.P
+○ ○ ○ ○ ● ○ ○ ○
+.P
+○ ○ ● ○ ○ ● ● ●
+.P
+○ ○ ● ○ ● ○ ● ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+The LEDs are orange\.
+.P
+$ dotnet BinaryClock\.dll \-V
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ● ○ ●
+.P
+○ ○ ○ ● ○ ○ ○ ○
+.P
+○ ○ ○ ○ ○ ○ ○ ●
+.P
+○ ○ ○ ● ○ ● ○ ○
+.P
+○ ○ ○ ○ ○ ● ○ ●
+.P
+○ ○ ○ ○ ○ ● ○ ○
+.P
+The LEDs are white\.

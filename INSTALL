@@ -1,0 +1,8 @@
+dotnet publish -c Release
+rm -rf /usr/local/bin/.clock
+cp -r ./bin/Release/net7.0/publish /usr/local/bin/.clock
+mkdir /usr/local/man/man8
+cp BinaryClock.8 /usr/local/man/man8/BinaryClock.8
+gzip /usr/local/man/man8/BinaryClock.8 -f
+cp clock.service /lib/systemd/system/clock.service
+systemctl daemon-reload

@@ -1,91 +1,151 @@
 ﻿using System;
+using System.Text;
 using System.Drawing;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.SenseHat;
+using Iot.Device.SenseHatText;
 using UnitsNet;
 
-using SenseHat sh = new SenseHat();
-
-Color on = Color.FromArgb(150, 150, 150);
-Color off = Color.FromArgb(0, 0, 0);
-
-Console.Clear();
-
-Console.WriteLine("Programmet starter");
-
-Console.CancelKeyPress += delegate {
-        sh.Fill(Color.FromArgb(0, 0, 0));
-        Console.WriteLine("\r\nProgrammet slutter");
-    };
-
-while (true)
+namespace BinaryClock
 {
-
-    (int dx, int dy, bool holding) = JoystickState(sh);
-
-    // if (holding)
-    // {
-    //     n++;
-    // }
-
-    // x = (x + 8 + dx) % 8;
-    // y = (y + 8 + dy) % 8;
-
-    DateTime time = DateTime.Now;
-
-
-
-
-    for (int i = 0; i < 8; i++)
+    public class Program
     {
-        setPixel(i, 0, (time.Hour & (int)Math.Pow(2, i)) > 0 ? on : off);
-    }
+        static ClockDisplay clockDisplay;
 
-    for (int i = 0; i < 8; i++)
-    {
-        setPixel(i, 1, (time.Minute & (int)Math.Pow(2, i)) > 0 ? on : off);
-    }
+        static SenseHat sh;
 
-    for (int i = 0; i < 8; i++)
-    {
-        setPixel(i, 2, (time.Second & (int)Math.Pow(2, i)) > 0 ? on : off);
-    }
+        public static event EventHandler OnPressedUp;
+        public static event EventHandler OnPressedDown;
+        public static event EventHandler OnPressedLeft;
+        public static event EventHandler OnPressedRight;
 
-    Thread.Sleep(1000);
+        static HatState prevState = new HatState();
+        static HatState currentState = new HatState();
+
+        static bool exiting = false;
+
+
+        /// <summary>
+        /// Main program method. Gets command line arguments and initiates ClockDisplay.
+        /// </summary>
+        public static void Main(string[] args)
+        {
+
+        bool twentyfour = true;
+        bool tall = false;
+        bool exitloop = false;
+
+            if (args.Length > 0)
+            {
+                foreach (string arg in args)
+                {
+                    switch (arg)
+                    {
+                        case "-V":
+                        case "--vertical":
+                            tall = true;
+                            break;
+                        case "-A":
+                        case "--ampm":
+                            twentyfour = false;
+                            break;
+                        case ">":
+                            exitloop = true;
+                            break;
+                        default:
+                            ShowHelp();
+                            break;
+
+                    }
+
+                    if (exitloop)
+                        break;
+                }
+            }
+
+            sh = new SenseHat();
+
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+
+            Console.CancelKeyPress += delegate {
+                    exit();
+                };
+
+            Logger.Log(sh, "Programmet starter");
+
+            clockDisplay = new ClockDisplay(sh, twentyfour, tall);
+
+            while (!exiting)
+            {
+                if (!Logger.logging)
+                {
+                    currentState = clockDisplay.JoystickState();
+
+                    if (currentState.holding)
+                    {
+                        Environment.Exit(0);
+                    }
+
+                    if (currentState.dx > 0 && prevState.dx <= 0)
+                    {
+                        OnPressedRight.Invoke(null, null);
+                    }
+                    else if (currentState.dx < 0 && prevState.dx >= 0)
+                    {
+                        OnPressedLeft.Invoke(null, null);
+                    }
+
+                    if (currentState.dy > 0 && prevState.dy <= 0)
+                    {
+                        OnPressedDown.Invoke(null, null);
+                    }
+                    else if (currentState.dy < 0 && prevState.dy >= 0)
+                    {
+                        OnPressedUp.Invoke(null, null);
+                    }
+
+                    clockDisplay.UpdateDisplay();
+                }
+
+                Thread.Sleep(10);
+            }
+        }
+
+        /// <summary>
+        /// Print help information to console, then exit program.
+        /// </summary>
+        static void ShowHelp()
+        {
+            StringBuilder helpText = new StringBuilder();
+            helpText.AppendLine("Usage: dotnet yourapp.dll [OPTIONS]");
+            helpText.AppendLine("Displays a binary clock on the SenseHat LED Matrix.");
+            helpText.AppendLine();
+            helpText.AppendLine("Options:");
+            helpText.AppendLine("-V, --vertical\t\tDisplay the clock in vertical format.");
+            helpText.AppendLine("-A, --ampm\t\tDisplay the clock in 12 hour mode with AM/PM indication.");
+            helpText.AppendLine("-?, --help\t\tDisplay this help message.");
+
+        Console.WriteLine(helpText.ToString());
+            Environment.Exit(0);
+        }
+
+        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            exit();
+        }
+
+        static void exit()
+        {
+            exiting = true;
+            if (clockDisplay != null)
+                clockDisplay.TurnOff();
+            if (sh != null)
+                Logger.Log(sh, "Programmet slutter");
+            else
+                Logger.Log("Programmet slutter");
+        }
+
+    }
 }
 
-void setPixel(int x, int y, Color color)
-{
-    sh.SetPixel(7 - x, y, color);
-}
-
-(int, int, bool) JoystickState(SenseHat sh)
-{
-    sh.ReadJoystickState();
-
-    int dx = 0;
-    int dy = 0;
-
-    if (sh.HoldingUp)
-    {
-        dy--;
-    }
-
-    if (sh.HoldingDown)
-    {
-        dy++;
-    }
-
-    if (sh.HoldingLeft)
-    {
-        dx--;
-    }
-
-    if (sh.HoldingRight)
-    {
-        dx++;
-    }
-
-    return (dx, dy, sh.HoldingButton);
-}
